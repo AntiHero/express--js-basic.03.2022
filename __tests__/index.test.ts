@@ -1,9 +1,13 @@
 import supertest from 'supertest';
 // @ts-ignore
 import sessiontest from 'supertest-session';
+import mongoose from 'mongoose';
 
 import app from '../src/app';
 import books from '../fakeDb';
+import { Book } from '../src/models/books';
+import * as booksRepository from '../src/repositories/books';
+import { connectToMongoDb } from '../src/utils/connectToMongoDb';
 
 describe('testing static', () => {
   let server: supertest.SuperTest<supertest.Test>;
@@ -25,7 +29,7 @@ describe('testing static', () => {
   });
 });
 
-describe('/api/books', () => {
+describe.skip('/api/books', () => {
   let server: supertest.SuperTest<supertest.Test>;
 
   beforeEach(() => {
@@ -53,10 +57,7 @@ describe('/api/books', () => {
     expect(responseBeforePost.headers['content-type']).toMatch(/json/);
     expect(responseBeforePost.body.length).toEqual(3);
 
-    await server
-      .post('/api/books')
-      .send(JSON.stringify(book))
-      .expect(204);
+    await server.post('/api/books').send(JSON.stringify(book)).expect(204);
 
     const responseAfterPost = await server
       .get('/api/books')
@@ -67,7 +68,7 @@ describe('/api/books', () => {
   });
 });
 
-describe('middleware', () => {
+describe.skip('middleware', () => {
   let server: supertest.SuperTest<supertest.Test>;
 
   beforeEach(() => {
@@ -82,7 +83,7 @@ describe('middleware', () => {
   });
 });
 
-describe('session', () => {
+describe.skip('session', () => {
   let session: supertest.SuperTest<supertest.Test>;
 
   beforeEach(() => {
@@ -100,7 +101,53 @@ describe('session', () => {
         ).toBe(1);
       }
     }
-    
+
     expect(session.cookies.length).toBe(2);
+  });
+});
+
+describe('mongodb', () => {
+  let server: supertest.SuperTest<supertest.Test>;
+
+  beforeAll(async () => {
+    await connectToMongoDb(process.env.MONGODB_URL_TEST as string);
+  });
+
+  beforeEach(async () => {
+    server = supertest(app);
+    await Book.deleteMany({});
+  });
+
+  test('POST /api/books should create book in DB', async () => {
+    await server
+      .post('/api/books')
+      .send({ author: 'test', title: 'test', year: 2000 })
+      .expect(201)
+      .expect('Content-Type', /json/);
+
+    expect((await booksRepository.getAllBooks()).length).toBe(1);
+  });
+
+  test('DELETE /api/books/:id should delete book in DB', async () => {
+    expect.assertions(1);
+
+    await server
+      .post('/api/books')
+      .send({ author: 'test', title: 'test', year: 2000 })
+      .expect(201)
+      .expect('Content-Type', /json/);
+
+    const books = await booksRepository.getAllBooks();
+
+    if (books.length) {
+      const id = books[0]._id.toString();
+      await booksRepository.deleteBook(id);
+      await server.delete(`/api/books/${id}`).expect(204);
+      expect((await Book.find({})).length).toBe(0);
+    }
+  });
+
+  afterAll(async () => {
+    await mongoose.connection.close();
   });
 });
