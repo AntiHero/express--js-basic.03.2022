@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 
 import books from '../fakeDb';
+import session from 'cookie-session';
 import { idGenerator } from './utils/idGenerator';
 import { requestLogger } from './middlewares/logger';
 
@@ -13,6 +14,26 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
+
+const oneDay = 1000 * 60 * 60 * 24;
+
+app.use(
+  session({
+    secret: 'sfajnh4faAN99', // обязательное поле
+    maxAge: oneDay,
+  })
+);
+
+app.get('/counter', (req, res) => {
+  if (req.session) {
+    req.session.counter = req.session.counter ?? 0;
+
+    res.send({ counter: ++req.session.counter});
+    return;
+  }
+
+  res.end();
+});
 
 app.get(
   '/api/books',

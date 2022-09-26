@@ -1,4 +1,6 @@
 import supertest from 'supertest';
+// @ts-ignore
+import sessiontest from 'supertest-session';
 
 import app from '../src/app';
 import books from '../fakeDb';
@@ -48,7 +50,6 @@ describe('/api/books', () => {
 
     const responseBeforePost = await server.get('/api/books').expect(200);
 
-    console.log(responseBeforePost.headers);
     expect(responseBeforePost.headers['content-type']).toMatch(/json/);
     expect(responseBeforePost.body.length).toEqual(3);
 
@@ -74,9 +75,32 @@ describe('middleware', () => {
   });
   test('should call console.log', async () => {
     jest.spyOn(console, 'log');
-    
+
     await server.get('/api/books');
-    
+
     expect(console.log).toHaveBeenCalledTimes(2);
-  })
+  });
+});
+
+describe('session', () => {
+  let session: supertest.SuperTest<supertest.Test>;
+
+  beforeEach(() => {
+    session = sessiontest(app);
+  });
+
+  test('GET /counter should increase counter and use cookie', async () => {
+    await session.get('/counter').expect(200);
+
+    // index.d.ts
+    for (const cookie of session.cookies) {
+      if (cookie.name === 'session') {
+        expect(
+          JSON.parse(Buffer.from(cookie.value, 'base64').toString()).counter
+        ).toBe(1);
+      }
+    }
+    
+    expect(session.cookies.length).toBe(2);
+  });
 });
