@@ -1,0 +1,55 @@
+import * as dotenv from 'dotenv';
+import express from 'express';
+import cors from 'cors';
+
+import books from '../fakeDb';
+import { idGenerator } from './utils/idGenerator';
+
+dotenv.config();
+
+const app = express();
+
+app.use(cors());
+app.use(express.json());
+app.use(express.static('public'));
+
+app.get('/api/books', (req, res) => {
+  res.status(200).send(books);
+});
+
+app.get('/api/books/:id', (req, res) => {
+  for (const book of books) {
+    if (book.id === Number(req.params.id)) {
+      res.status(200).send(book);
+      return;
+    }
+  }
+  res.sendStatus(404);
+});
+
+app.delete('/api/books/:id', (req, res) => {
+  const id = Number(req.params.id);
+
+  for (let i = 0; i < books.length; i++) {
+    if (books[i].id === id) {
+      books.splice(i, 1);
+      res.sendStatus(204);
+      return;
+    }
+  }
+
+  res.sendStatus(404);
+});
+
+app.post('/api/books', (req, res) => {
+  const { author, title, year } = req.body;
+  books.push({ id: idGenerator(), author, title, year });
+
+  res.sendStatus(204);
+});
+
+app.get('*', (_, res) => {
+  res.status(404).send('Not Found! 404');
+});
+
+export default app;
