@@ -1,0 +1,64 @@
+*,
+*::after,
+*::before {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background-color: rgb(139, 135, 129);
+  text-align: center;
+}
+
+h1 {
+  font-size: 72px;
+  color: white;
+  text-shadow: 2px 2px 3px rgb(68, 68, 68);
+  margin-bottom: 50px;
+}
+
+.button {
+  outline: none;
+  position: relative;
+  background-color: #04aa6d;
+  border: none;
+  font-size: 28px;
+  color: #ffffff;
+  padding: 20px;
+  width: 200px;
+  text-align: center;
+  -webkit-transition-duration: 0.4s; /* Safari */
+  transition-duration: 0.4s;
+  text-decoration: none;
+  overflow: hidden;
+  cursor: pointer;
+  -webkit-box-shadow: -2px 0px 8px 3px rgba(34, 60, 80, 0.2) inset;
+  -moz-box-shadow: -2px 0px 8px 3px rgba(34, 60, 80, 0.2) inset;
+  box-shadow: -2px 0px 8px 3px rgba(34, 60, 80, 0.2) inset;
+}
+
+.button:after {
+  content: '';
+  background: #39dd78;
+  display: block;
+  position: absolute;
+  padding-top: 300%;
+  padding-left: 350%;
+  margin-left: -20px !important;
+  margin-top: -120%;
+  opacity: 0;
+  transition: all 0.8s;
+}
+
+.button:active:after {
+  padding: 0;
+  margin: 0;
+  opacity: 1;
+  transition: 0s;
+}
