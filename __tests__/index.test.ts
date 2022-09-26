@@ -65,3 +65,18 @@ describe('/api/books', () => {
     expect(responseAfterPost.body.length).toEqual(4);
   });
 });
+
+describe('middleware', () => {
+  let server: supertest.SuperTest<supertest.Test>;
+
+  beforeEach(() => {
+    server = supertest(app);
+  });
+  test('should call console.log', async () => {
+    jest.spyOn(console, 'log');
+    
+    await server.get('/api/books');
+    
+    expect(console.log).toHaveBeenCalledTimes(2);
+  })
+});

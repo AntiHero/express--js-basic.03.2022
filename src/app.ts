@@ -4,6 +4,7 @@ import cors from 'cors';
 
 import books from '../fakeDb';
 import { idGenerator } from './utils/idGenerator';
+import { requestLogger } from './middlewares/logger';
 
 dotenv.config();
 
@@ -13,9 +14,13 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 
-app.get('/api/books', (req, res) => {
-  res.status(200).send(books);
-});
+app.get(
+  '/api/books',
+  requestLogger,
+  (req: express.Request, res: express.Response) => {
+    res.status(200).send(books);
+  }
+);
 
 app.get('/api/books/:id', (req, res) => {
   for (const book of books) {
