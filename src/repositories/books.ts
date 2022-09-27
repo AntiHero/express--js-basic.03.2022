@@ -26,7 +26,7 @@ export const postBook = async ({ author, year, title }: BookSchema) => {
 
 export const getBook = async (id: string) => {
   try {
-    return Book.findById(id);
+    return Book.findById(id).exec();
   } catch (e) {
     return Promise.reject("Can't load data");
   }
@@ -34,7 +34,7 @@ export const getBook = async (id: string) => {
 
 export const deleteBook = async (id: string) => {
   try {
-    await Book.findByIdAndDelete(id);
+    await Book.findByIdAndDelete(id).exec();
   } catch (e) {
     return Promise.reject("Can't load data");
   }
@@ -45,7 +45,11 @@ export const updateBook = async (
   { author, year, title }: BookSchema
 ) => {
   try {
-    const book = await Book.findByIdAndUpdate(id, { author, year, title });
+    const book = await Book.findByIdAndUpdate(id, {
+      author,
+      year,
+      title,
+    }).exec();
     return book;
   } catch (e) {
     return Promise.reject("Can't update data");
