@@ -49,7 +49,7 @@ export const updateBook = async (
       author,
       year,
       title,
-    }).exec();
+    }, { new: true }).exec();
     return book;
   } catch (e) {
     return Promise.reject("Can't update data");
